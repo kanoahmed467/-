@@ -1,41 +1,97 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Manga Reader</title>
-   <style>
-    /* إضافة عداد صفحات شفاف وثابت */
-    #page-counter {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        background: rgba(0, 0, 0, 0.6);
-        color: white;
-        padding: 5px 12px;
-        border-radius: 20px;
-        font-family: sans-serif;
-        font-size: 12px;
-        z-index: 1000;
-        pointer-events: none; /* عشان ميعطلش اللمس */
-    }
-</style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Manga Kingdom Reader</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0e0e0e; /* أسود عميق مريح للعين */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
 
-<div id="page-counter">جاري التحميل...</div>
+        #pages-container {
+            width: 100%;
+            max-width: 100%; /* عشان يستغل عرض الشاشة بالكامل */
+        }
+
+        img {
+            display: block;
+            width: 100%;
+            height: auto;
+            border: none;
+            margin: 0;
+            background: #1a1a1a; /* لون مؤقت لحد ما الصورة تحمل */
+        }
+
+        /* ستايل العداد المطور */
+        #page-counter {
+            position: fixed;
+            bottom: 20px;
+            left: 20px; /* خليه شمال عشان مبيغطيش على زرار الرجوع في بعض الموبايلات */
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            padding: 6px 15px;
+            border-radius: 50px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 14px;
+            backdrop-filter: blur(5px); /* تأثير زجاجي شيك */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 9999;
+            transition: opacity 0.3s;
+        }
+
+        /* إخفاء العداد وقت السكون (اختياري) */
+        .scrolling #page-counter { opacity: 1; }
+    </style>
 </head>
 <body>
-    <div id="pages"></div>
-  <script>
-    // كود لمراقبة السكرول وتحديث رقم الصفحة
-    window.addEventListener('scroll', () => {
-        const images = document.querySelectorAll('img');
-        images.forEach((img, index) => {
-            const rect = img.getBoundingClientRect();
-            if (rect.top >= 0 && rect.top <= window.innerHeight) {
-                document.getElementById('page-counter').innerText = `صفحة ${index + 1} من ${images.length}`;
-            }
-        });
-    });
-</script>
+
+    <div id="page-counter">جاري تجهيز الفصول...</div>
+    <div id="pages-container"></div>
+
+    <script>
+        // 1. استخراج الـ IDs من الرابط (المحرك الأساسي)
+        const urlParams = new URLSearchParams(window.location.search);
+        const imgsData = urlParams.get('imgs');
+        const container = document.getElementById('pages-container');
+        const counter = document.getElementById('page-counter');
+
+        if (imgsData) {
+            const ids = imgsData.split(',');
+            
+            // 2. إنشاء الصور وإضافتها للصفحة
+            ids.forEach((id) => {
+                const img = document.createElement('img');
+                // بنستخدم رابط Catbox المباشر
+                img.src = `https://files.catbox.moe/${id}.jpg`;
+                img.loading = "lazy"; // ميزة الـ Lazy Loading لتوفير النت والسرعة
+                img.alt = "Manga Page";
+                container.appendChild(img);
+            });
+
+            // 3. تحديث العداد أثناء السكرول
+            window.addEventListener('scroll', () => {
+                const images = container.querySelectorAll('img');
+                let found = false;
+
+                images.forEach((img, index) => {
+                    const rect = img.getBoundingClientRect();
+                    // لو قمة الصورة قريبة من قمة الشاشة
+                    if (!found && rect.top <= window.innerHeight / 2 && rect.bottom >= window.innerHeight / 2) {
+                        counter.innerText = `الصفحة ${index + 1} من ${images.length}`;
+                        found = true;
+                    }
+                });
+            });
+        } else {
+            counter.innerText = "❌ لم يتم العثور على صور";
+        }
+    </script>
 </body>
 </html>
