@@ -24,6 +24,25 @@
             img.loading = "lazy"; // تحميل ذكي
             container.appendChild(img);
         });
+
+        // 1. القارئ بيعرف هو في أنهي مانجا من الرابط
+const urlParams = new URLSearchParams(window.location.search);
+const mangaId = urlParams.get('mid'); // بيسحب رقم 50 مثلاً
+
+// 2. كود بيحفظ إنت وصلت لفين وأنت بتنزل بصباعك
+window.onscroll = () => {
+    // كود العداد القديم بتاعنا...
+    // وبنزود عليه السطر ده:
+    localStorage.setItem('scroll_' + mangaId, window.scrollY); 
+};
+
+// 3. كود بيرجعك لمكانك أول ما تفتح الصفحة
+window.onload = () => {
+    const savedPos = localStorage.getItem('scroll_' + mangaId);
+    if (savedPos) {
+        window.scrollTo(0, savedPos); // نط للمكان اللي فات!
+    }
+};
     </script>
 </body>
 </html>
