@@ -1,29 +1,37 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Manga Reader</title>
     <style>
-        body { margin: 0; background: #000; display: flex; flex-direction: column; align-items: center; }
-        img { width: 100%; max-width: 800px; display: block; margin: 0; padding: 0; border: none; }
-        .loading { color: #fff; padding: 20px; font-family: sans-serif; }
+        body { margin: 0; padding: 0; background: #000; display: flex; flex-direction: column; align-items: center; }
+        img { width: 100%; max-width: 800px; display: block; border: none; }
+        .error-msg { color: #555; padding: 20px; font-family: sans-serif; text-align: center; }
     </style>
 </head>
 <body>
     <div id="pages"></div>
     <script>
-        // الرابط بياخد الصور من الـ URL Parameters
         const urlParams = new URLSearchParams(window.location.search);
-        const images = urlParams.get('imgs').split(',');
-        const container = document.getElementById('pages');
+        const imgsData = urlParams.get('imgs');
         
-        images.forEach(src => {
-            const img = document.createElement('img');
-            img.src = src;
-            img.loading = "lazy"; // تحميل ذكي
-            container.appendChild(img);
-        });
+        if (imgsData) {
+            const ids = imgsData.split(',');
+            const container = document.getElementById('pages');
+            
+            ids.forEach(id => {
+                if (!id) return;
+                const img = document.createElement('img');
+                // لو الرابط كامل سيبه، لو ID بس ركب له الدومين
+                img.src = id.startsWith('http') ? id : `https://files.catbox.moe/${id}.jpg`;
+                img.onerror = () => img.style.display = 'none'; // لو صورة باظت متبوظش العرض
+                img.loading = "lazy";
+                container.appendChild(img);
+            });
+        } else {
+            document.body.innerHTML += '<div class="error-msg">لا توجد صور لعرضها</div>';
+        }
     </script>
 </body>
 </html>
