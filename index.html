@@ -6,24 +6,46 @@
     <title>Manga Reader</title>
     <style>
         body { margin: 0; background: #000; display: flex; flex-direction: column; align-items: center; }
-        img { width: 100%; max-width: 800px; display: block; margin: 0; padding: 0; border: none; }
+        /* ضفت min-height عشان الصور وهي بتحمل يكون ليها مساحة والسكرول ميضربش */
+        img { width: 100%; max-width: 800px; display: block; margin: 0; padding: 0; border: none; min-height: 500px; background: #111;}
         .loading { color: #fff; padding: 20px; font-family: sans-serif; }
     </style>
 </head>
 <body>
     <div id="pages"></div>
     <script>
-        // الرابط بياخد الصور من الـ URL Parameters
         const urlParams = new URLSearchParams(window.location.search);
-        const images = urlParams.get('imgs').split(',');
+        const imgsParam = urlParams.get('imgs') || "";
+        const mangaId = urlParams.get('mid') || "temp"; // سحب الـ mid اللي بعته من البايثون
+        const images = imgsParam.split(',');
         const container = document.getElementById('pages');
         
+        // 1. تحميل الصور
         images.forEach(src => {
             const img = document.createElement('img');
             img.src = src;
-            img.loading = "lazy"; // تحميل ذكي
+            img.loading = "lazy";
             container.appendChild(img);
         });
+
+        // 2. 🔥 حفظ مكان السكرول (كل ما اليوزر يحرك الشاشة)
+        window.onscroll = () => {
+            localStorage.setItem('save_pos_' + mangaId, window.scrollY);
+        };
+
+        // 3. 🔥 استرجاع المكان (أول ما الصفحة تفتح)
+        window.onload = () => {
+            const savedScroll = localStorage.getItem('save_pos_' + mangaId);
+            if (savedScroll) {
+                // بنعمل تأخير بسيط (500ms) عشان نتأكد إن المتصفح رسم الصور وبقى فيه مساحة ينط فيها
+                setTimeout(() => {
+                    window.scrollTo({
+                        top: parseInt(savedScroll),
+                        behavior: 'smooth' 
+                    });
+                }, 500);
+            }
+        };
     </script>
 </body>
 </html>
