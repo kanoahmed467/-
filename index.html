@@ -4,34 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Manga Reader</title>
-    <style>
-        body { margin: 0; padding: 0; background: #000; display: flex; flex-direction: column; align-items: center; }
-        img { width: 100%; max-width: 800px; display: block; border: none; }
-        .error-msg { color: #555; padding: 20px; font-family: sans-serif; text-align: center; }
-    </style>
+   <style>
+    /* إضافة عداد صفحات شفاف وثابت */
+    #page-counter {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.6);
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-family: sans-serif;
+        font-size: 12px;
+        z-index: 1000;
+        pointer-events: none; /* عشان ميعطلش اللمس */
+    }
+</style>
+
+<div id="page-counter">جاري التحميل...</div>
 </head>
 <body>
     <div id="pages"></div>
-    <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const imgsData = urlParams.get('imgs');
-        
-        if (imgsData) {
-            const ids = imgsData.split(',');
-            const container = document.getElementById('pages');
-            
-            ids.forEach(id => {
-                if (!id) return;
-                const img = document.createElement('img');
-                // لو الرابط كامل سيبه، لو ID بس ركب له الدومين
-                img.src = id.startsWith('http') ? id : `https://files.catbox.moe/${id}.jpg`;
-                img.onerror = () => img.style.display = 'none'; // لو صورة باظت متبوظش العرض
-                img.loading = "lazy";
-                container.appendChild(img);
-            });
-        } else {
-            document.body.innerHTML += '<div class="error-msg">لا توجد صور لعرضها</div>';
-        }
-    </script>
+  <script>
+    // كود لمراقبة السكرول وتحديث رقم الصفحة
+    window.addEventListener('scroll', () => {
+        const images = document.querySelectorAll('img');
+        images.forEach((img, index) => {
+            const rect = img.getBoundingClientRect();
+            if (rect.top >= 0 && rect.top <= window.innerHeight) {
+                document.getElementById('page-counter').innerText = `صفحة ${index + 1} من ${images.length}`;
+            }
+        });
+    });
+</script>
 </body>
 </html>
